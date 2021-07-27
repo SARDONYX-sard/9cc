@@ -5,7 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+extern *user_input;
 void error_at(char *loc, char *fmt, ...);
+
+//
+// Tokenizer
+//
 
 // 現在着目しているトークン
 Token *token;
@@ -25,7 +30,7 @@ bool consume(char op) {
 // それ以外の場合にはエラーを報告する。
 void expect(char op) {
   if (token->kind != TK_RESERVED || token->str[0] != op)
-    error_at(token->str, "'%c'ではありません", op);
+    error_at(token->str, "'%c'で0はありません", op);
   token = token->next;
 }
 
@@ -49,8 +54,9 @@ Token *new_token(TokenKind kind, Token *cur, char *str) {
   return tok;
 }
 
-// 入力文字列pをトークナイズしてそれを返す
-Token *tokenize(char *p) {
+// `user_input` をトークン化して、新しいトークンを返す
+Token *tokenize() {
+  char *p = user_input;
   Token head;
   head.next = NULL;
   Token *cur = &head;
