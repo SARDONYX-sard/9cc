@@ -1,0 +1,10 @@
+{
+  "cSpell.words": ["idiv"],
+  "files.associations": {
+    "*.html": "html",
+    "*.md": "markdown",
+    "*.txt": "django-txt",
+    "token.h": "c",
+    "node.h": "c"
+  }
+}
