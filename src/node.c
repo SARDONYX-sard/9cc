@@ -3,26 +3,40 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+// token.c
+
 extern bool consume(char op);
 extern int expect_number();
 extern void expect(char op);
 
+//
+// Parser
+//
+
 /* ノードの作成関数 */
-Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
+Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
+  return node;
+}
+
+Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
+  Node *node = new_node(kind);
   node->lhs = lhs;
   node->rhs = rhs;
   return node;
 }
 
 /* 整数ノードの作成関数 */
-Node *new_node_num(int val) {
-  Node *node = calloc(1, sizeof(Node));
-  node->kind = ND_NUM;
+Node *new_num(int val) {
+  Node *node = new_node(ND_NUM);
   node->val = val;
   return node;
 }
+
+Node *expr();
+Node *mul();
+Node *primary();
 
 /*
   左結合の演算子をパーズする関数
@@ -33,9 +47,9 @@ Node *expr() {
 
   for (;;) {
     if (consume('+'))
-      node = new_node(ND_ADD, node, mul());
+      node = new_binary(ND_ADD, node, mul());
     else if (consume('-'))
-      node = new_node(ND_SUB, node, mul());
+      node = new_binary(ND_SUB, node, mul());
     else
       return node;
   }
@@ -50,9 +64,9 @@ Node *mul() {
 
   for (;;) {
     if (consume('*'))
-      node = new_node(ND_MUL, node, primary());
+      node = new_binary(ND_MUL, node, primary());
     else if (consume('/'))
-      node = new_node(ND_DIV, node, primary());
+      node = new_binary(ND_DIV, node, primary());
     else
       return node;
   }
@@ -73,5 +87,3 @@ Node *primary() {
   // そうでなければ数値のはず
   return new_node_num(expect_number());
 }
-
-
