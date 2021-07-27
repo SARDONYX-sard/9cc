@@ -4,7 +4,7 @@ CFLAGS=-std=c11 -g -static
 9cc: 9cc.c
 
 test: 9cc
-				./bash/./test.sh
+				bash ./bash/test.sh
 
 fmt:
 				bash ./bash/fmt.sh
