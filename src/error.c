@@ -2,11 +2,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// 入力プログラム
-char *user_input;
+extern char *user_input;
 
 // エラーを報告するための関数
-// エラー箇所を報告する
+void error(char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
+}
+
+// エラー箇所を報告する関数
 void error_at(char *loc, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
