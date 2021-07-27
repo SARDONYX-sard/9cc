@@ -7,9 +7,8 @@ typedef enum {
   ND_NUM,  // 整数
 } NodeKind;
 
-typedef struct Node Node;
-
 // 抽象構文木のノードの型
+typedef struct Node Node;
 struct Node {
   NodeKind kind;  // ノードの型
   Node *lhs;      // 左辺
