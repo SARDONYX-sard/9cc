@@ -1,14 +1,8 @@
+#include "./9cc.h"
+
 //
 // Tokenizer
 //
-
-#include "./struct/token.h"
-
-#include <ctype.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 extern char *user_input;
 extern void error_at(char *loc, char *fmt, ...);

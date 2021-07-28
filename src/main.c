@@ -1,24 +1,4 @@
-#include <stdbool.h>
-#include <stdio.h>
-
-#include "./struct/node.h"
-#include "./struct/token.h"
-
-// error.c
-void error(char *fmt, ...);
-
-// generate.c
-
-extern void gen(Node *node);
-
-// node.c
-
-extern Node *expr();
-
-// token.c
-
-extern Token *token;
-extern Token *tokenize();
+#include "./9cc.h"
 
 // 入力プログラム
 char *user_input;

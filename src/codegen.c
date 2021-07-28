@@ -1,6 +1,4 @@
-#include <stdio.h>
-
-#include "./struct/node.h"
+#include "./9cc.h"
 
 //
 // Code generator

@@ -1,8 +1,4 @@
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-extern char *user_input;
+#include "./9cc.h"
 
 // エラーを報告するための関数
 void error(char *fmt, ...) {

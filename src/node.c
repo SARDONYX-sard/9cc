@@ -1,13 +1,4 @@
-#include "./struct/node.h"
-
-#include <stdbool.h>
-#include <stdlib.h>
-
-// token.c
-
-extern bool consume(char *op);
-extern int expect_number();
-extern void expect(char *op);
+#include "./9cc.h"
 
 //
 // Parser
