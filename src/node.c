@@ -20,6 +20,7 @@ Node *new_node(NodeKind kind) {
   return node;
 }
 
+/* 二分木ノードの作成関数 */
 Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
   Node *node = new_node(kind);
   node->lhs = lhs;
@@ -36,6 +37,7 @@ Node *new_num(int val) {
 
 Node *expr();
 Node *mul();
+Node *unary();
 Node *primary();
 
 /*
@@ -57,19 +59,30 @@ Node *expr() {
 
 /*
   乗除演算子をパースする関数
-  EBNF: mul = primary ("*" primary | "/" primary)*
+  EBNF: mul = unary ("*" unary | "/" unary)*
  */
 Node *mul() {
-  Node *node = primary();
+  Node *node = unary();
 
   for (;;) {
+    // gen関数で演算子のアセンブリを生成しているため、ここでは構文木のみを作成している
     if (consume('*'))
-      node = new_binary(ND_MUL, node, primary());
+      node = new_binary(ND_MUL, node, unary());
     else if (consume('/'))
-      node = new_binary(ND_DIV, node, primary());
+      node = new_binary(ND_DIV, node, unary());
     else
       return node;
   }
+}
+
+/* 単項演算子をパースする関数
+  EBNF: unary   = ("+" | "-")? punary
+*/
+Node *unary() {
+  if (consume('+')) return unary();  // +xをxに置換
+  if (consume('-'))
+    return new_binary(ND_SUB, new_num(0), unary());  // -xを0 - xに置換
+  return primary();
 }
 
 /*
@@ -85,5 +98,5 @@ Node *primary() {
   }
 
   // そうでなければ数値のはず
-  return new_node_num(expect_number());
+  return new_num(expect_number());
 }
