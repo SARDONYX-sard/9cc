@@ -6,7 +6,7 @@
 
 // error.c
 void error(char *fmt, ...);
-extern void error_at(char *loc, char *fmt, ...);
+
 // generate.c
 
 extern void gen(Node *node);
@@ -14,15 +14,9 @@ extern void gen(Node *node);
 // node.c
 
 extern Node *expr();
-extern Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
-extern Node *new_node_num(int val);
+
 // token.c
 
-extern bool consume(char op);
-extern void expect(char op);
-extern int expect_number();
-extern bool at_eof();
-extern int expect_number();
 extern Token *token;
 extern Token *tokenize();
 
@@ -39,7 +33,7 @@ int main(int argc, char **argv) {
 
   // アセンブリの前半部分を出力
   printf(".intel_syntax noprefix\n");
-  printf(".globl main\n");
+  printf(".global main\n");
   printf("main:\n");
 
   // 抽象構文木を下りながらアセンブリコード生成
