@@ -5,9 +5,9 @@
 
 // token.c
 
-extern bool consume(char op);
+extern bool consume(char *op);
 extern int expect_number();
-extern void expect(char op);
+extern void expect(char *op);
 
 //
 // Parser
@@ -36,21 +36,68 @@ Node *new_num(int val) {
 }
 
 Node *expr();
+Node *equality();
+Node *relational();
+Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
 
 /*
   左結合の演算子をパーズする関数
-  EBNF: expr = mul ("+" mul | "-" mul)*
+  EBNF: expr = equality
  */
-Node *expr() {
+Node *expr() { return equality(); }
+
+/*
+  `==`と`!=`をパースする関数
+  EBNF: equality = relational ("==" relational | "!=" relational)*
+ */
+Node *equality() {
+  Node *node = relational();
+
+  for (;;) {
+    if (consume("=="))
+      node = new_binary(ND_EQ, node, relational());
+    else if (consume("!="))
+      node = new_binary(ND_NE, node, relational());
+    else
+      return node;
+  }
+}
+
+/*
+  大なり小なりをパースする関数
+  EBNF: relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+ */
+Node *relational() {
+  Node *node = add();
+
+  for (;;) {
+    if (consume("<"))
+      node = new_binary(ND_LT, node, add());
+    else if (consume("<="))
+      node = new_binary(ND_LE, node, add());
+    else if (consume(">"))
+      node = new_binary(ND_LT, add(), node);
+    else if (consume(">="))
+      node = new_binary(ND_LE, add(), node);
+    else
+      return node;
+  }
+}
+
+/*
+  大なり小なりをパースする関数
+  EBNF: add = mul ("+" mul | "-" mul)*
+ */
+Node *add() {
   Node *node = mul();
 
   for (;;) {
-    if (consume('+'))
+    if (consume("+"))
       node = new_binary(ND_ADD, node, mul());
-    else if (consume('-'))
+    else if (consume("-"))
       node = new_binary(ND_SUB, node, mul());
     else
       return node;
@@ -66,9 +113,9 @@ Node *mul() {
 
   for (;;) {
     // gen関数で演算子のアセンブリを生成しているため、ここでは構文木のみを作成している
-    if (consume('*'))
+    if (consume("*"))
       node = new_binary(ND_MUL, node, unary());
-    else if (consume('/'))
+    else if (consume("/"))
       node = new_binary(ND_DIV, node, unary());
     else
       return node;
@@ -79,8 +126,8 @@ Node *mul() {
   EBNF: unary   = ("+" | "-")? punary
 */
 Node *unary() {
-  if (consume('+')) return unary();  // +xをxに置換
-  if (consume('-'))
+  if (consume("+")) return unary();  // +xをxに置換
+  if (consume("-"))
     return new_binary(ND_SUB, new_num(0), unary());  // -xを0 - xに置換
   return primary();
 }
@@ -91,9 +138,9 @@ Node *unary() {
  */
 Node *primary() {
   // 次のトークンが"("なら、"(" expr ")"のはず
-  if (consume('(')) {
+  if (consume("(")) {
     Node *node = expr();
-    expect(')');
+    expect(")");
     return node;
   }
 

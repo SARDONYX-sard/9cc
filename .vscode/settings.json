@@ -1,5 +1,5 @@
 {
-  "cSpell.words": ["idiv"],
+  "cSpell.words": ["idiv", "movzb", "sete", "setle", "setne"],
   "files.associations": {
     "*.html": "html",
     "*.md": "markdown",
