@@ -1,9 +1,8 @@
 # Makefileのインデントはタブ文字でなければいけません。スペース4個や8個ではエラーになります
-CFLAGS=-std=c11 -g -static
-# 				cc ./src/*.c -o 9cc  -g -static
-9cc:
-				cc ./src/*.c -o 9cc  -g -static
+CFLAGS=-std=c11 -g -static -o 9cc
 
+9cc: clean
+				cc ./src/*.c -o 9cc -g -static
 
 test: 9cc
 				bash ./bash/test.sh

@@ -5,6 +5,7 @@
     "*.md": "markdown",
     "*.txt": "django-txt",
     "token.h": "c",
-    "node.h": "c"
+    "node.h": "c",
+    "stdlib.h": "c"
   }
 }
