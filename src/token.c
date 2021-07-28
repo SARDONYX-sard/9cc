@@ -1,16 +1,17 @@
+//
+// Tokenizer
+//
+
 #include "./struct/token.h"
 
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-extern *user_input;
-void error_at(char *loc, char *fmt, ...);
-
-//
-// Tokenizer
-//
+extern char *user_input;
+extern void error_at(char *loc, char *fmt, ...);
 
 // 現在着目しているトークン
 Token *token;
@@ -68,7 +69,7 @@ Token *tokenize() {
       continue;
     }
 
-    if (*p == '+' || *p == '-') {
+    if (strchr("+-*/()", *p)) {
       cur = new_token(TK_RESERVED, cur, p++);
       continue;
     }
@@ -79,7 +80,7 @@ Token *tokenize() {
       continue;
     }
 
-    error_at(token->str, "トークナイズできません");
+    error_at(p, "トークナイズできません");
   }
 
   new_token(TK_EOF, cur, p);
