@@ -6,6 +6,10 @@
     "*.txt": "django-txt",
     "token.h": "c",
     "node.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "ctype.h": "c"
+  },
+  "files.exclude": {
+    "**/src/*.o": true
   }
 }
