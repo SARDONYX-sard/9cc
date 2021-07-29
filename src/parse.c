@@ -1,7 +1,6 @@
 #include "./9cc.h"
 
 //
-// Parser
 // 注釈：
 // tokenで分割した文字列を、構造体を利用して抽象構文木にする
 // gen関数で演算子のアセンブリを生成しているため、ここでは構文木のみを作成
@@ -38,10 +37,18 @@ static Node *new_num(long val) {
   return node;
 }
 
+/* 変数ノード作成関数 */
+static Node *new_var_node(char name) {
+  Node *node = new_node(ND_VAR);
+  node->name = name;
+  return node;
+}
+
 // forward declaration
 
 static Node *stmt(void);
 static Node *expr(void);
+static Node *assign(void);
 static Node *equality(void);
 static Node *relational(void);
 static Node *add(void);
@@ -69,14 +76,14 @@ Node *program(void) {
   EBNF: stmt = "return" expr ";"
               | expr ";"
  */
-Node *stmt(void) {
+static Node *stmt(void) {
   if (consume("return")) {
     Node *node = new_unary(ND_RETURN, expr());
     expect(";");
     return node;
   }
 
-  Node *node = expr();
+  Node *node = new_unary(ND_EXPR_STMT, expr());
   expect(";");
   return node;
 }
@@ -85,7 +92,14 @@ Node *stmt(void) {
   assign演算子をパースする関数
   EBNF: expr = equality
  */
-static Node *expr(void) { return equality(); }
+static Node *expr(void) { return assign(); }
+
+// assign = equality ("=" assign)?
+static Node *assign(void) {
+  Node *node = equality();
+  if (consume("=")) node = new_binary(ND_ASSIGN, node, assign());
+  return node;
+}
 
 /*
   比較演算子の`==`と`!=`をパースする関数
@@ -171,7 +185,7 @@ static Node *unary(void) {
 
 /*
   算術優先記号`()`と`整数`をパースする関数
-  EBNF: primary = "(" expr ")" | num
+  EBNF: primary = "(" expr ")" | ident | num
  */
 static Node *primary(void) {
   // 次のトークンが"("なら、"(" expr ")"のはず
@@ -180,6 +194,9 @@ static Node *primary(void) {
     expect(")");
     return node;
   }
+
+  Token *tok = consume_ident();
+  if (tok) return new_var_node(*tok->str);
 
   // そうでなければ数値のはず
   return new_num(expect_number());

@@ -1,7 +1,6 @@
 #include "./9cc.h"
 
 //
-// Tokenizer
 // 引数として渡ってきた文字列を単語ごとに分割する
 //
 
@@ -42,6 +41,17 @@ bool consume(char *op) {
     return false;
   token = token->next;
   return true;
+}
+
+/*
+  現在のトークンが識別子の場合、トークンを1つ読み進める
+  それ以外はnull
+ */
+Token *consume_ident(void) {
+  if (token->kind != TK_IDENT) return NULL;
+  Token *t = token;
+  token = token->next;
+  return t;
 }
 
 //  現在のトークンが `op` であることを確認し、トークンを1つ読み進める。
@@ -106,6 +116,12 @@ Token *tokenize(void) {
     if (startswith(p, "return") && !is_alnum(p[6])) {
       cur = new_token(TK_RESERVED, cur, p, 6);
       p += 6;
+      continue;
+    }
+
+    // Identifier
+    if ('a' <= *p && *p <= 'z') {
+      cur = new_token(TK_IDENT, cur, p++, 1);
       continue;
     }
 
