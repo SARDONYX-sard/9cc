@@ -8,7 +8,7 @@
       "name": "cc build and debug active file",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/9cc",
+      "program": "${workspaceFolder}/build/9cc",
       // "args": ["a=3;b=5*6-8;a+b/2;"],
       "args": ["return 5+20-4"],
       "stopAtEntry": false,
@@ -23,7 +23,7 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "cc compile",
+      // "preLaunchTask": "cc compile",
       "miDebuggerPath": "/usr/bin/gdb"
     },
 
