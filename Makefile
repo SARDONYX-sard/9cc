@@ -21,10 +21,11 @@ SRCS=$(call rwildcard,src/,*.c)
 OBJS=$(SRCS:.c=.o)
 #-------------------------------------------------------------------------------------------------------
 
-9cc: $(OBJS)
-				$(CC) -o 9cc $(OBJS) $(LDFLAGS)
+9cc: $(OBJS) setup
+				$(CC) -o ./build/9cc $(OBJS) $(LDFLAGS)
 
 $(OBJS): src/9cc.h # すべての.oファイルが9cc.hに依存していることを表している
+
 
 test: 9cc
 				bash ./bash/test.sh
@@ -36,7 +37,10 @@ ct: clean
 fmt:
 				bash ./bash/fmt.sh
 
+setup:
+				mkdir build
+
 clean:
-				rm -f 9cc src/*.o *~ tmp*
+				rm -rf ./build src/*.o *~ tmp*
 
 .PHONY: test clean
