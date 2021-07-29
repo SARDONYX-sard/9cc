@@ -48,11 +48,11 @@ extern Token *token;
 // parse.c
 //
 
-// Local variable
+// ローカル変数
 typedef struct Var Var;
 struct Var {
-  Var *next;
-  char *name;  // Variable name
+  Var *next;   // 次の変数かNULL
+  char *name;  // 変数の名前
   int offset;  // RBP(ベースレジスタ)からの相対距離(オフセット)
 };
 

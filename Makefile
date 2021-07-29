@@ -26,7 +26,7 @@ ct: clean
 				make test
 
 build: $(OBJS)
-				mkdir build && $(CC) -o ./build/9cc $(OBJS) $(LDFLAGS)
+				mkdir -p build && $(CC) -o ./build/9cc $(OBJS) $(LDFLAGS)
 
 $(OBJS): src/9cc.h # すべての.oファイルが9cc.hに依存していることを表している
 
