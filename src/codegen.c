@@ -4,11 +4,17 @@
 // Code generator
 //
 
-/* スタックマシンライクな構文木生成関数 */
+/* スタックマシンライクな構文木からのアセンブリ出力関数 */
 void gen(Node *node) {
-  if (node->kind == ND_NUM) {
-    printf("  push %d\n", node->val);
-    return;
+  switch (node->kind) {
+    case ND_NUM:
+      printf("  push %ld\n", node->val);
+      return;
+    case ND_RETURN:
+      gen(node->lhs);
+      printf("  pop rax\n");
+      printf("  ret\n");
+      return;
   }
 
   gen(node->lhs);
@@ -54,4 +60,17 @@ void gen(Node *node) {
   }
 
   printf("  push rax\n");
+}
+
+void codegen(Node *node) {
+  printf(".intel_syntax noprefix\n");
+  printf(".global main\n");
+  printf("main:\n");
+
+  for (Node *n = node; n; n = n->next) {
+    gen(n);
+    printf("  pop rax\n");
+  }
+
+  printf("  ret\n");
 }

@@ -2,49 +2,71 @@
 
 //
 // Tokenizer
+// 引数として渡ってきた文字列を単語ごとに分割する
 //
 
-extern char *user_input;
-extern void error_at(char *loc, char *fmt, ...);
+char *user_input;
+Token *token;  // 現在着目しているトークン
 
-// 現在着目しているトークン
-Token *token;
+// エラーを報告し、終了する関数
+void error(char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
+}
+
+// エラー箇所を報告し、終了する関数
+void error_at(char *loc, char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+
+  int pos = loc - user_input;
+  fprintf(stderr, "%s\n", user_input);
+  fprintf(stderr, "%*s", pos, " ");  // pos個の空白を出力
+  fprintf(stderr, "^ ");
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
+}
 
 /*
-  次のトークンが期待している記号のときには、トークンを1つ読み進めて
-  真を返す。それ以外の場合には偽を返す。
+  現在のトークンが `op` にマッチするか？
+  さらに、トークンを1つ読み進める。
   @param op operator(演算子)
  */
 bool consume(char *op) {
   if (token->kind != TK_RESERVED || strlen(op) != token->len ||
-      memcmp(token->str, op, token->len))
+      strncmp(token->str, op, token->len))
     return false;
   token = token->next;
   return true;
 }
 
-// 次のトークンが期待している記号のときには、トークンを1つ読み進める。
+//  現在のトークンが `op` であることを確認し、トークンを1つ読み進める。
 // それ以外の場合にはエラーを報告する。
 void expect(char *op) {
   if (token->kind != TK_RESERVED || strlen(op) != token->len ||
-      memcmp(token->str, op, token->len))
+      strncmp(token->str, op, token->len))
     error_at(token->str, "'%c'で0はありません", op);
   token = token->next;
 }
 
 // 次のトークンが数値の場合、トークンを1つ読み進めてその数値を返す。
 // それ以外の場合にはエラーを報告する。
-int expect_number() {
+long expect_number(void) {
   if (token->kind != TK_NUM) error_at(token->str, "数ではありません");
-  int val = token->val;
+  long val = token->val;
   token = token->next;
   return val;
 }
 
+// 現在解析中の文字列が`;`のトークン型か？
 bool at_eof() { return token->kind == TK_EOF; }
 
 // 新しいトークンを作成してcurに繋げる
-Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
+static Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
   Token *tok = calloc(1, sizeof(Token));
   tok->kind = kind;
   tok->str = str;
@@ -53,23 +75,37 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
   return tok;
 }
 
-/* pとqが一致するか、`qの文字数`を`byte数`として`byte数分だけ`比較する関数
+/*
+  pとqが一致するか、qの文字数分の文字を比較する関数
   @param *p トークンとして渡ってきた文字
   @param *q 比較演算子
  */
-bool startswith(char *p, char *q) { return memcmp(p, q, strlen(q)) == 0; }
+bool startswith(char *p, char *q) { return strncmp(p, q, strlen(q)) == 0; }
+
+static bool is_alpha(char c) {
+  return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
+}
+
+// 引数`c`は半角英数字またはアンダーバーか判定する関数
+static bool is_alnum(char c) { return is_alpha(c) || ('0' <= c && c <= '9'); }
 
 // `user_input` をトークン化して、新しいトークンを返す
-Token *tokenize() {
+Token *tokenize(void) {
   char *p = user_input;
-  Token head;
-  head.next = NULL;
+  Token head = {};
   Token *cur = &head;
 
   while (*p) {
     // 空白文字をスキップ
     if (isspace(*p)) {
       p++;
+      continue;
+    }
+
+    // Keywords
+    if (startswith(p, "return") && !is_alnum(p[6])) {
+      cur = new_token(TK_RESERVED, cur, p, 6);
+      p += 6;
       continue;
     }
 
@@ -82,11 +118,12 @@ Token *tokenize() {
     }
 
     // 1文字の区切り文字の場合
-    if (strchr("+-*/()<>", *p)) {
+    if (ispunct(*p)) {
       cur = new_token(TK_RESERVED, cur, p++, 1);
       continue;
     }
 
+    // Integer literal
     if (isdigit(*p)) {
       cur = new_token(TK_NUM, cur, p, 0);
       char *q = p;
