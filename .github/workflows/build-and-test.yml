@@ -1,0 +1,22 @@
+name: "Build and test"
+on:
+  push:
+    branches: ["main"]
+  pull_request: {}
+jobs:
+  build:
+    name: "Build"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v2"
+      - name: "build 9cc"
+        run: "make"
+
+  test:
+    name: "Test"
+    needs: ["build"]
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v2"
+      - name: "Run test.sh"
+        run: "make test"
