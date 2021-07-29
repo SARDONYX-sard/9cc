@@ -21,25 +21,21 @@ SRCS=$(call rwildcard,src/,*.c)
 OBJS=$(SRCS:.c=.o)
 #-------------------------------------------------------------------------------------------------------
 
-9cc: $(OBJS) setup
-				$(CC) -o ./build/9cc $(OBJS) $(LDFLAGS)
-
-$(OBJS): src/9cc.h # すべての.oファイルが9cc.hに依存していることを表している
-
-
-test: 9cc
-				bash ./bash/test.sh
-
 # clean & test
 ct: clean
 				make test && make clean
 
+9cc: $(OBJS)
+				mkdir build && $(CC) -o ./build/9cc $(OBJS) $(LDFLAGS)
+
+$(OBJS): src/9cc.h # すべての.oファイルが9cc.hに依存していることを表している
+
+test: 9cc
+				bash ./test/test.sh
+
 # bash formmat
 fmt:
 				shfmt -i 2 -w ./**/*.sh && echo formmatted.
-
-setup:
-				mkdir build
 
 clean:
 				rm -rf ./build src/*.o *~ tmp*
