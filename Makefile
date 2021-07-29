@@ -34,8 +34,9 @@ test: 9cc
 ct: clean
 				make test && make clean
 
+# bash formmat
 fmt:
-				bash ./bash/fmt.sh
+				shfmt -i 2 -w ./**/*.sh && echo formmatted.
 
 setup:
 				mkdir build
