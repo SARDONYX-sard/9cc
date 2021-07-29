@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: "actions/checkout@v2"
       - name: "build 9cc"
-        run: "make"
+        run: "make build"
 
   test:
     name: "Test"

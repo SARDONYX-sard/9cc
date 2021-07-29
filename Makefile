@@ -23,14 +23,14 @@ OBJS=$(SRCS:.c=.o)
 
 # clean & test
 ct: clean
-				make test && make clean
+				make test
 
-9cc: $(OBJS)
+build: $(OBJS)
 				mkdir build && $(CC) -o ./build/9cc $(OBJS) $(LDFLAGS)
 
 $(OBJS): src/9cc.h # すべての.oファイルが9cc.hに依存していることを表している
 
-test: 9cc
+test: build
 				bash ./test/test.sh
 
 # bash formmat
