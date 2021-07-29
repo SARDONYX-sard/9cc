@@ -8,9 +8,10 @@
     "token.h": "c",
     "node.h": "c",
     "stdlib.h": "c",
-    "ctype.h": "c"
+    "ctype.h": "c",
+    "9cc.h": "c"
   },
   "files.exclude": {
-    "**/src/*.o": true
+    "**/**/*.o": true
   }
 }

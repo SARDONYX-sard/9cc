@@ -96,7 +96,7 @@ static bool is_alpha(char c) {
   return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
 }
 
-// 引数`c`は半角英数字またはアンダーバーか判定する関数
+// 引数`c`は半角英字(is_alpha)、数字、アンダーバーかを判定する関数
 static bool is_alnum(char c) { return is_alpha(c) || ('0' <= c && c <= '9'); }
 
 // `user_input` をトークン化して、新しいトークンを返す
@@ -120,8 +120,10 @@ Token *tokenize(void) {
     }
 
     // Identifier
-    if ('a' <= *p && *p <= 'z') {
-      cur = new_token(TK_IDENT, cur, p++, 1);
+    if (is_alpha(*p)) {
+      char *q = p++;
+      while (is_alnum(*p)) p++;
+      cur = new_token(TK_IDENT, cur, q, p - q);
       continue;
     }
 

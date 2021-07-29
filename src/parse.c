@@ -1,13 +1,25 @@
 #include "./9cc.h"
 
+
+
 //
 // 注釈：
 // tokenで分割した文字列を、構造体を利用して抽象構文木にする
 // gen関数で演算子のアセンブリを生成しているため、ここでは構文木のみを作成
 //
 
-// パース結果のノードを順にストアするグローバル配列
-Node *code[100];
+// 解析中に作成されたすべてのローカル変数インスタンスは
+// この配列に蓄積されます。
+Var *locals;
+
+// Find a local variable by name.
+static Var *find_var(Token *tok) {
+  for (Var *var = locals; var; var = var->next)
+    if (strlen(var->name) == tok->len &&
+        !strncmp(tok->str, var->name, tok->len))
+      return var;
+  return NULL;
+}
 
 /* ノードの作成関数 */
 static Node *new_node(NodeKind kind) {
@@ -38,10 +50,19 @@ static Node *new_num(long val) {
 }
 
 /* 変数ノード作成関数 */
-static Node *new_var_node(char name) {
+static Node *new_var_node(Var *var) {
   Node *node = new_node(ND_VAR);
-  node->name = name;
+  node->var = var;
   return node;
+}
+
+/* ローカル変数のノード作成関数 */
+static Var *new_lvar(char *name) {
+  Var *var = calloc(1, sizeof(Var)); // Varの構造体一つずつに1byteメモリを確保
+  var->next = locals;
+  var->name = name;
+  locals = var;
+  return var;
 }
 
 // forward declaration
@@ -60,7 +81,9 @@ static Node *primary(void);
   複数行プログラム全体をパースする関数
   EBNF: program = stmt*
  */
-Node *program(void) {
+Function *program(void) {
+  locals = NULL;
+
   Node head = {};
   Node *cur = &head;
 
@@ -68,7 +91,11 @@ Node *program(void) {
     cur->next = stmt();
     cur = cur->next;
   }
-  return head.next;
+
+  Function *prog = calloc(1, sizeof(Function));
+  prog->node = head.next;
+  prog->locals = locals;
+  return prog;
 }
 
 /*
@@ -196,7 +223,12 @@ static Node *primary(void) {
   }
 
   Token *tok = consume_ident();
-  if (tok) return new_var_node(*tok->str);
+  if (tok) {
+    Var *var = find_var(tok);
+    if (!var)
+      var = new_lvar(strndup(tok->str, tok->len));  // トーク文字列名を変数名にする
+    return new_var_node(var);
+  }
 
   // そうでなければ数値のはず
   return new_num(expect_number());
