@@ -1,7 +1,5 @@
 #include "./9cc.h"
 
-
-
 //
 // 注釈：
 // tokenで分割した文字列を、構造体を利用して抽象構文木にする
@@ -58,7 +56,7 @@ static Node *new_var_node(Var *var) {
 
 /* ローカル変数のノード作成関数 */
 static Var *new_lvar(char *name) {
-  Var *var = calloc(1, sizeof(Var)); // Varの構造体一つずつに1byteメモリを確保
+  Var *var = calloc(1, sizeof(Var));  // Varの構造体一つずつに1byteメモリを確保
   var->next = locals;
   var->name = name;
   locals = var;
@@ -98,9 +96,12 @@ Function *program(void) {
   return prog;
 }
 
+static Node *read_expr_stmt(void) { return new_unary(ND_EXPR_STMT, expr()); }
+
 /*
   行の区切り文字`;`をパースする関数
   EBNF: stmt = "return" expr ";"
+              | "if" "(" expr ")" stmt ("else" stmt)?
               | expr ";"
  */
 static Node *stmt(void) {
@@ -110,14 +111,24 @@ static Node *stmt(void) {
     return node;
   }
 
-  Node *node = new_unary(ND_EXPR_STMT, expr());
+  if (consume("if")) {
+    Node *node = new_node(ND_IF);
+    expect("(");
+    node->cond = expr();
+    expect(")");
+    node->then = stmt();
+    if (consume("else")) node->els = stmt();
+    return node;
+  }
+
+  Node *node = read_expr_stmt();
   expect(";");
   return node;
 }
 
 /*
   assign演算子をパースする関数
-  EBNF: expr = equality
+  EBNF: expr = assign
  */
 static Node *expr(void) { return assign(); }
 
@@ -226,7 +237,8 @@ static Node *primary(void) {
   if (tok) {
     Var *var = find_var(tok);
     if (!var)
-      var = new_lvar(strndup(tok->str, tok->len));  // トーク文字列名を変数名にする
+      var = new_lvar(
+          strndup(tok->str, tok->len));  // トーク文字列名を変数名にする
     return new_var_node(var);
   }
 

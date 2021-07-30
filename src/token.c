@@ -99,6 +99,25 @@ static bool is_alpha(char c) {
 // 引数`c`は半角英字(is_alpha)、数字、アンダーバーかを判定する関数
 static bool is_alnum(char c) { return is_alpha(c) || ('0' <= c && c <= '9'); }
 
+/* *pに渡されたトークンが予約語と一致したらそれを返す関数 */
+static char *starts_with_reserved(char *p) {
+  // Keyword
+  static char *kw[] = {"return", "if", "else"};
+
+  for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++) {
+    int len = strlen(kw[i]);
+    if (startswith(p, kw[i]) && !is_alnum(p[len])) return kw[i];
+  }
+
+  // Multi-letter punctuator(2文字以上の区切り文字。比較演算子)
+  static char *ops[] = {"==", "!=", "<=", ">="};
+
+  for (int i = 0; i < sizeof(ops) / sizeof(*ops); i++)
+    if (startswith(p, ops[i])) return ops[i];
+
+  return NULL;
+}
+
 // `user_input` をトークン化して、新しいトークンを返す
 Token *tokenize(void) {
   char *p = user_input;
@@ -112,10 +131,12 @@ Token *tokenize(void) {
       continue;
     }
 
-    // Keywords
-    if (startswith(p, "return") && !is_alnum(p[6])) {
-      cur = new_token(TK_RESERVED, cur, p, 6);
-      p += 6;
+    // 予約語または比較演算子
+    char *kw = starts_with_reserved(p);
+    if (kw) {
+      int len = strlen(kw);
+      cur = new_token(TK_RESERVED, cur, p, len);
+      p += len;
       continue;
     }
 
@@ -124,14 +145,6 @@ Token *tokenize(void) {
       char *q = p++;
       while (is_alnum(*p)) p++;
       cur = new_token(TK_IDENT, cur, q, p - q);
-      continue;
-    }
-
-    // 2文字以上の区切り文字の場合
-    if (startswith(p, "==") || startswith(p, "!=") || startswith(p, "<=") ||
-        startswith(p, ">=")) {
-      cur = new_token(TK_RESERVED, cur, p, 2);
-      p += 2;
       continue;
     }
 

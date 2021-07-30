@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/build/9cc",
       // "args": ["a=3;b=5*6-8;a+b/2;"],
-      "args": ["return 5+20-4"],
+      "args": ["if (2-1) return 2; return 3;"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/src",
       "environment": [],
