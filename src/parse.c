@@ -103,6 +103,7 @@ static Node *read_expr_stmt(void) { return new_unary(ND_EXPR_STMT, expr()); }
   EBNF: stmt = "return" expr ";"
               | "if" "(" expr ")" stmt ("else" stmt)?
               | "while" "(" expr ")" stmt
+              | "for" "(" expr? ";" expr? ";" expr? ")" stmt
               | expr ";"
  */
 static Node *stmt(void) {
@@ -127,6 +128,28 @@ static Node *stmt(void) {
     expect("(");
     node->cond = expr();
     expect(")");
+    node->then = stmt();
+    return node;
+  }
+
+  if (consume("for")) {
+    Node *node = new_node(ND_FOR);
+    expect("(");
+
+    // "for"初期値構文の始めに";"が来ていないかを確かめることで、
+    // EBNFの"?"というオプショナルを実現している
+    if (!consume(";")) { // "for"の初期値
+      node->init = read_expr_stmt();
+      expect(";");
+    }
+    if (!consume(";")) { // "for"の条件部分
+      node->cond = expr();
+      expect(";");
+    }
+    if (!consume(")")) { // "for"の累積量部分
+      node->inc = read_expr_stmt();
+      expect(")");
+    }
     node->then = stmt();
     return node;
   }
