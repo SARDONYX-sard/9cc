@@ -1,11 +1,19 @@
 #!/bin/bash
 # @(#) This script is testing framework.
+
+# -xc: これ以降に書かれたオプションをcリンカに渡す．
+# -c: ソースファイルを、コンパイルまたはアセンブルまではしますが、リンクはしません
+cat <<EOF | gcc -xc -c -o ./build/tmp2.o -
+int ret3() { return 3; }
+int ret5() { return 5; }
+EOF
+
 assert() {
   expected="$1"
   input="$2"
 
   ./build/9cc "$input" >./build/tmp.s
-  cc -o ./build/tmp ./build/tmp.s
+  gcc -o ./build/tmp ./build/tmp.s ./build/tmp2.o
   ./build/tmp
   actual="$?"
 
@@ -73,5 +81,9 @@ assert 55 'i=0; j=0; while(i<=10) {j=i+j; i=i+1;} return j;'
 # for
 assert 3 'for (;;) return 3; return 5;'
 assert 55 'i=0; j=0; for (i=0; i<=10; i=i+1) j=i+j; return j;' # 10の階乗
+
+# function
+assert 3 'return ret3();'
+assert 5 'return ret5();'
 
 echo OK

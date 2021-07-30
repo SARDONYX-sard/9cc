@@ -99,7 +99,7 @@ Function *program(void) {
 static Node *read_expr_stmt(void) { return new_unary(ND_EXPR_STMT, expr()); }
 
 /*
-  行の区切り文字`;`をパースする関数
+  予約語と、行の区切り文字`;`をパースする関数
   EBNF: stmt = "return" expr ";"
               | "if" "(" expr ")" stmt ("else" stmt)?
               | "while" "(" expr ")" stmt
@@ -270,8 +270,9 @@ static Node *unary(void) {
 }
 
 /*
-  算術優先記号`()`と`整数`をパースする関数
-  EBNF: primary = "(" expr ")" | ident | num
+  算術優先記号`()`と`関数`、`変数`、`整数`をパースする関数
+  EBNF: primary = "(" expr ")" | ident args?  | num
+          args = "(" ")"
  */
 static Node *primary(void) {
   // 次のトークンが"("なら、"(" expr ")"のはず
@@ -283,6 +284,16 @@ static Node *primary(void) {
 
   Token *tok = consume_ident();
   if (tok) {
+    // 識別子の次に"()"がきたら Function
+    if (consume("(")) {
+      expect(")");
+      Node *node = new_node(ND_FUNCALL);
+      node->funcname = strndup(tok->str, tok->len);  // strndupは第2引数のサイズ指定分、文字列を複製する
+      return node;
+    }
+
+
+
     Var *var = find_var(tok);
     if (!var)
       var = new_lvar(
