@@ -6,9 +6,4 @@ Rui Ueyama [ruiu@cs.stanford.edu](mailto:ruiu@cs.stanford.edu) 氏のサイト�
 
 ---
 
-変更log:
-  変数宣言を可能にする。（現在は、変数用のメモリ領域を半角小文字アルファべット26文字分確保し全て宣言済みで行っている）
-
----
-
 Licence: MIT
