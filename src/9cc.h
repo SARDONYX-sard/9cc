@@ -1,3 +1,4 @@
+#define _GNU_SOURCE  // Linux拡張機能へのアクセスのための記述。 strndup関数の使用に必要なため記載。
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -8,7 +9,6 @@
 //
 // utils/strndup.c
 //
-char *strndup(const char *s, size_t n);
 
 //
 // tokenize.c
