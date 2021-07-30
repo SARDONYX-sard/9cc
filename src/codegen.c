@@ -6,6 +6,8 @@
 
 // ユニークなアセンブラのラベルを生成するための変数
 static int labelseq = 1;
+// 第一引数、第二引数、第三引数…と順に続く配列
+static char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 /* 与えられたノードのアドレスをスタックに積む関数 */
 static void gen_addr(Node *node) {
@@ -66,7 +68,9 @@ void gen(Node *node) {
       } else {
         gen(node->cond);
         printf("  pop rax\n");
-        printf("  cmp rax, 0\n"); // if条件がfalse(0)の場合、if文から外れる(goto end)
+        printf(
+            "  cmp rax, 0\n");  // if条件がfalse(0)の場合、if文から外れる(goto
+                                // end)
         printf("  je  .L.end.%d\n", seq);
         gen(node->then);
         printf(".L.end.%d:\n", seq);
@@ -104,10 +108,22 @@ void gen(Node *node) {
     case ND_BLOCK:
       for (Node *n = node->body; n; n = n->next) gen(n);
       return;
-    case ND_FUNCALL:
+    case ND_FUNCALL: {
+      int nargs = 0;
+      for (Node *arg = node->args; arg; arg = arg->next) {
+        gen(arg);
+        nargs++;
+      };
+
+      // 配列のindexは0から始まるので-1する
+      for (int i = nargs - 1; i >= 0; i--) {
+        printf("  pop %s\n", argreg[i]);
+      }
+
       printf("  call %s\n", node->funcname);
       printf("  push rax\n");
       return;
+    }
     case ND_RETURN:
       gen(node->lhs);
       printf("  pop rax\n");

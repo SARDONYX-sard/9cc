@@ -3,9 +3,17 @@
 
 # -xc: これ以降に書かれたオプションをcリンカに渡す．
 # -c: ソースファイルを、コンパイルまたはアセンブルまではしますが、リンクはしません
+
+# 関数定義をあらかじめ定義し、gccで機械化したものを自作コンパイラで使う
 cat <<EOF | gcc -xc -c -o ./build/tmp2.o -
 int ret3() { return 3; }
 int ret5() { return 5; }
+int add(int x, int y) { return x+y; }
+int sub(int x, int y) { return x-y; }
+
+int add6(int a, int b, int c, int d, int e, int f) {
+  return a+b+c+d+e+f;
+}
 EOF
 
 assert() {
@@ -85,5 +93,8 @@ assert 55 'i=0; j=0; for (i=0; i<=10; i=i+1) j=i+j; return j;' # 10の階乗
 # function
 assert 3 'return ret3();'
 assert 5 'return ret5();'
+assert 8 'return add(3, 5);'
+assert 2 'return sub(5, 3);'
+assert 21 'return add6(1,2,3,4,5,6);'
 
 echo OK

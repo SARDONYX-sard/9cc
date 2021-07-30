@@ -180,7 +180,10 @@ static Node *stmt(void) {
  */
 static Node *expr(void) { return assign(); }
 
-// assign = equality ("=" assign)?
+/*
+  `=`演算子をパースする関数
+  EBNF: assign = equality ("=" assign)?
+ */
 static Node *assign(void) {
   Node *node = equality();
   if (consume("=")) node = new_binary(ND_ASSIGN, node, assign());
@@ -259,7 +262,8 @@ static Node *mul(void) {
   }
 }
 
-/* 単項演算子をパースする関数
+/*
+  単項演算子をパースする関数
   EBNF: unary   = ("+" | "-")? unary
 */
 static Node *unary(void) {
@@ -270,9 +274,25 @@ static Node *unary(void) {
 }
 
 /*
+  引数の有無に応じて処理が分岐し、パースする関数
+  EBNF: func-args = "(" (assign ("," assign)*)? ")"
+*/
+static Node *func_args(void) {
+  if (consume(")")) return NULL;
+
+  Node *head = assign();
+  Node *cur = head;
+  while (consume(",")) {
+    cur->next = assign();
+    cur = cur->next;
+  }
+  expect(")");
+  return head;
+}
+
+/*
   算術優先記号`()`と`関数`、`変数`、`整数`をパースする関数
   EBNF: primary = "(" expr ")" | ident args?  | num
-          args = "(" ")"
  */
 static Node *primary(void) {
   // 次のトークンが"("なら、"(" expr ")"のはず
@@ -286,13 +306,12 @@ static Node *primary(void) {
   if (tok) {
     // 識別子の次に"()"がきたら Function
     if (consume("(")) {
-      expect(")");
       Node *node = new_node(ND_FUNCALL);
-      node->funcname = strndup(tok->str, tok->len);  // strndupは第2引数のサイズ指定分、文字列を複製する
+      // strndupは第2引数のサイズ指定分、文字列を複製する
+      node->funcname = strndup(tok->str, tok->len);
+      node->args = func_args(); // 引数ノードの作成は`func_args`に任せる
       return node;
     }
-
-
 
     Var *var = find_var(tok);
     if (!var)
