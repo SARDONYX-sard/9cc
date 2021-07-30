@@ -9,7 +9,7 @@
 # ・ Makeは再帰的なワイルドカード機能を提供していないので、ここではそれを紹介する:
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 # ・あるパターンにマッチする全てのファイルを再帰的に検索する方法
-ALL_HTMLS := $(call rwildcard,foo/,*.html)
+ALL_CS := $(call rwildcard,src/,*.c)
 
 
 # 変数宣言
@@ -17,7 +17,7 @@ ALL_HTMLS := $(call rwildcard,foo/,*.html)
 # -g: デバグ情報を出力する
 # -static: スタティックリンクする
 CFLAGS=-std=c11 -g -static
-SRCS=$(call rwildcard,src/,*.c)
+SRCS=$(call ALL_CS)
 OBJS=$(SRCS:.c=.o)
 #-------------------------------------------------------------------------------------------------------
 
