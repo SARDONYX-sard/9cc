@@ -104,6 +104,7 @@ static Node *read_expr_stmt(void) { return new_unary(ND_EXPR_STMT, expr()); }
               | "if" "(" expr ")" stmt ("else" stmt)?
               | "while" "(" expr ")" stmt
               | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+              | "{" stmt* "}"
               | expr ";"
  */
 static Node *stmt(void) {
@@ -138,19 +139,33 @@ static Node *stmt(void) {
 
     // "for"初期値構文の始めに";"が来ていないかを確かめることで、
     // EBNFの"?"というオプショナルを実現している
-    if (!consume(";")) { // "for"の初期値
+    if (!consume(";")) {  // "for"の初期値
       node->init = read_expr_stmt();
       expect(";");
     }
-    if (!consume(";")) { // "for"の条件部分
+    if (!consume(";")) {  // "for"の条件部分
       node->cond = expr();
       expect(";");
     }
-    if (!consume(")")) { // "for"の累積量部分
+    if (!consume(")")) {  // "for"の累積量部分
       node->inc = read_expr_stmt();
       expect(")");
     }
     node->then = stmt();
+    return node;
+  }
+
+  if (consume("{")) {
+    Node head = {};
+    Node *cur = &head;
+
+    while (!consume("}")) {
+      cur->next = stmt();
+      cur = cur->next;
+    }
+
+    Node *node = new_node(ND_BLOCK);
+    node->body = head.next;
     return node;
   }
 

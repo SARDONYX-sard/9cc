@@ -1,4 +1,5 @@
-#define _GNU_SOURCE  // Linux拡張機能へのアクセスのための記述。 strndup関数の使用に必要なため記載。
+#define _GNU_SOURCE  // Linux拡張機能へのアクセスのための記述。
+                     // strndup関数の使用に必要なため記載。
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -71,6 +72,7 @@ typedef enum {
   ND_IF,         // "if"
   ND_WHILE,      // "while"
   ND_FOR,        // "for"
+  ND_BLOCK,      // "block"
   ND_EXPR_STMT,  // Expression statement
   ND_VAR,        // 変数
   ND_NUM,        // Integer
@@ -91,6 +93,9 @@ struct Node {
   Node *els;
   Node *init;  // "for"文の初期値
   Node *inc;   // final-expression(counterなど)
+
+  // Block
+  Node *body;
 
   Var *var;  // ノードの型が変数の場合のみ使う
   long val;  // kindがND_NUMの場合のみ使う
