@@ -316,7 +316,8 @@ static Node *mul(void) {
 
 /*
   単項演算子をパースする関数
-  EBNF: unary   = ("+" | "-")? unary
+  EBNF: unary   = ("+" | "-" | "*" | "&")? unary　
+                | primary
 */
 static Node *unary(void) {
   Token *tok;
@@ -324,6 +325,12 @@ static Node *unary(void) {
 
   if (tok = consume("-"))  // -xを0 - xに置換
     return new_binary(ND_SUB, new_num(0, tok), unary(), tok);
+
+  if (tok = consume("&"))  // -アドレスを取り出す
+    return new_unary(ND_ADDR, unary(), tok);
+
+  if (tok = consume("*"))  // ポインタまたはアドレスから値を取り出す
+    return new_unary(ND_DEREF, unary(), tok);
   return primary();
 }
 
