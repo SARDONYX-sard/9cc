@@ -20,7 +20,7 @@ static void gen_addr(Node *node) {
     return;
   }
 
-  error("not an local value");
+  error_tok(node->tok, "not an lvalue");
 }
 
 static void load(void) {

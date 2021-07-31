@@ -22,36 +22,37 @@ static Var *find_var(Token *tok) {
 }
 
 /* ノードの作成関数 */
-static Node *new_node(NodeKind kind) {
+static Node *new_node(NodeKind kind, Token *tok) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
+  node->tok = tok;
   return node;
 }
 
 /* 二分木ノードの作成関数 */
-static Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
-  Node *node = new_node(kind);
+static Node *new_binary(NodeKind kind, Node *lhs, Node *rhs, Token *tok) {
+  Node *node = new_node(kind, tok);
   node->lhs = lhs;
   node->rhs = rhs;
   return node;
 }
 
-static Node *new_unary(NodeKind kind, Node *expr) {
-  Node *node = new_node(kind);
+static Node *new_unary(NodeKind kind, Node *expr, Token *tok) {
+  Node *node = new_node(kind, tok);
   node->lhs = expr;
   return node;
 }
 
 /* 整数ノードの作成関数 */
-static Node *new_num(long val) {
-  Node *node = new_node(ND_NUM);
+static Node *new_num(long val, Token *tok) {
+  Node *node = new_node(ND_NUM, tok);
   node->val = val;
   return node;
 }
 
 /* 変数ノード作成関数 */
-static Node *new_var_node(Var *var) {
-  Node *node = new_node(ND_VAR);
+static Node *new_var_node(Var *var, Token *tok) {
+  Node *node = new_node(ND_VAR, tok);
   node->var = var;
   return node;
 }
@@ -138,7 +139,10 @@ static Function *function(void) {
   return fn;
 }
 
-static Node *read_expr_stmt(void) { return new_unary(ND_EXPR_STMT, expr()); }
+static Node *read_expr_stmt(void) {
+  Token *tok = token;
+  return new_unary(ND_EXPR_STMT, expr(), tok);
+}
 
 /*
   予約語と、行の区切り文字`;`をパースする関数
@@ -150,14 +154,15 @@ static Node *read_expr_stmt(void) { return new_unary(ND_EXPR_STMT, expr()); }
               | expr ";"
  */
 static Node *stmt(void) {
-  if (consume("return")) {
-    Node *node = new_unary(ND_RETURN, expr());
+  Token *tok;
+  if (tok = consume("return")) {
+    Node *node = new_unary(ND_RETURN, expr(), tok);
     expect(";");
     return node;
   }
 
-  if (consume("if")) {
-    Node *node = new_node(ND_IF);
+  if (tok = consume("if")) {
+    Node *node = new_node(ND_IF, tok);
     expect("(");
     node->cond = expr();
     expect(")");
@@ -166,8 +171,8 @@ static Node *stmt(void) {
     return node;
   }
 
-  if (consume("while")) {
-    Node *node = new_node(ND_WHILE);
+  if (tok = consume("while")) {
+    Node *node = new_node(ND_WHILE, tok);
     expect("(");
     node->cond = expr();
     expect(")");
@@ -175,8 +180,8 @@ static Node *stmt(void) {
     return node;
   }
 
-  if (consume("for")) {
-    Node *node = new_node(ND_FOR);
+  if (tok = consume("for")) {
+    Node *node = new_node(ND_FOR, tok);
     expect("(");
 
     // "for"初期値構文の始めに";"が来ていないかを確かめることで、
@@ -197,7 +202,7 @@ static Node *stmt(void) {
     return node;
   }
 
-  if (consume("{")) {
+  if (tok = consume("{")) {
     Node head = {};
     Node *cur = &head;
 
@@ -206,7 +211,7 @@ static Node *stmt(void) {
       cur = cur->next;
     }
 
-    Node *node = new_node(ND_BLOCK);
+    Node *node = new_node(ND_BLOCK, tok);
     node->body = head.next;
     return node;
   }
@@ -228,7 +233,8 @@ static Node *expr(void) { return assign(); }
  */
 static Node *assign(void) {
   Node *node = equality();
-  if (consume("=")) node = new_binary(ND_ASSIGN, node, assign());
+  Token *tok;
+  if (consume("=")) node = new_binary(ND_ASSIGN, node, assign(), tok);
   return node;
 }
 
@@ -238,12 +244,13 @@ static Node *assign(void) {
  */
 static Node *equality(void) {
   Node *node = relational();
+  Token *tok;
 
   for (;;) {
-    if (consume("=="))
-      node = new_binary(ND_EQ, node, relational());
-    else if (consume("!="))
-      node = new_binary(ND_NE, node, relational());
+    if (tok = consume("=="))
+      node = new_binary(ND_EQ, node, relational(), tok);
+    else if (tok = consume("!="))
+      node = new_binary(ND_NE, node, relational(), tok);
     else
       return node;
   }
@@ -255,16 +262,17 @@ static Node *equality(void) {
  */
 static Node *relational(void) {
   Node *node = add();
+  Token *tok;
 
   for (;;) {
-    if (consume("<"))
-      node = new_binary(ND_LT, node, add());
-    else if (consume("<="))
-      node = new_binary(ND_LE, node, add());
-    else if (consume(">"))
-      node = new_binary(ND_LT, add(), node);
-    else if (consume(">="))
-      node = new_binary(ND_LE, add(), node);
+    if (tok = consume("<"))
+      node = new_binary(ND_LT, node, add(), tok);
+    else if (tok = consume("<="))
+      node = new_binary(ND_LE, node, add(), tok);
+    else if (tok = consume(">"))
+      node = new_binary(ND_LT, add(), node, tok);
+    else if (tok = consume(">="))
+      node = new_binary(ND_LE, add(), node, tok);
     else
       return node;
   }
@@ -276,12 +284,13 @@ static Node *relational(void) {
  */
 static Node *add(void) {
   Node *node = mul();
+  Token *tok;
 
   for (;;) {
-    if (consume("+"))
-      node = new_binary(ND_ADD, node, mul());
-    else if (consume("-"))
-      node = new_binary(ND_SUB, node, mul());
+    if (tok = consume("+"))
+      node = new_binary(ND_ADD, node, mul(), tok);
+    else if (tok = consume("-"))
+      node = new_binary(ND_SUB, node, mul(), tok);
     else
       return node;
   }
@@ -293,12 +302,13 @@ static Node *add(void) {
  */
 static Node *mul(void) {
   Node *node = unary();
+  Token *tok;
 
   for (;;) {
-    if (consume("*"))
-      node = new_binary(ND_MUL, node, unary());
-    else if (consume("/"))
-      node = new_binary(ND_DIV, node, unary());
+    if (tok = consume("*"))
+      node = new_binary(ND_MUL, node, unary(), tok);
+    else if (tok = consume("/"))
+      node = new_binary(ND_DIV, node, unary(), tok);
     else
       return node;
   }
@@ -309,9 +319,11 @@ static Node *mul(void) {
   EBNF: unary   = ("+" | "-")? unary
 */
 static Node *unary(void) {
+  Token *tok;
   if (consume("+")) return unary();  // +xをxに置換
-  if (consume("-"))
-    return new_binary(ND_SUB, new_num(0), unary());  // -xを0 - xに置換
+
+  if (tok = consume("-"))  // -xを0 - xに置換
+    return new_binary(ND_SUB, new_num(0, tok), unary(), tok);
   return primary();
 }
 
@@ -344,11 +356,11 @@ static Node *primary(void) {
     return node;
   }
 
-  Token *tok = consume_ident();
-  if (tok) {
+  Token *tok;
+  if (tok = consume_ident()) {
     // 識別子の次に"()"がきたら Function
     if (consume("(")) {
-      Node *node = new_node(ND_FUNCALL);
+      Node *node = new_node(ND_FUNCALL, tok);
       // strndupは第2引数のサイズ指定分、文字列を複製する
       node->funcname = strndup(tok->str, tok->len);
       node->args = func_args();  // 引数ノードの作成は`func_args`に任せる
@@ -359,9 +371,11 @@ static Node *primary(void) {
     if (!var)
       // 既存の変数名が見つからない場合、トークン文字列名を変数名にする
       var = new_lvar(strndup(tok->str, tok->len));
-    return new_var_node(var);
+    return new_var_node(var, tok);
   }
 
+  tok = token;
+  if (tok->kind != TK_NUM) error_tok(tok, "expected expression");
   // そうでなければ数値のはず
-  return new_num(expect_number());
+  return new_num(expect_number(), tok);
 }

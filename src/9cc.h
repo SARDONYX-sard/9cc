@@ -24,14 +24,15 @@ typedef struct Token Token;
 struct Token {
   TokenKind kind;  // トークンの型
   Token *next;     // 次の入力トークン
-  int val;         // kindがTK_NUMの場合、その数値
-  char *str;       // トークン文字列
-  int len;         // トークンの長さ
+  int val;    // kindがTK_NUMの場合、その数値
+  char *str;  // トークン文字列
+  int len;    // トークンの長さ
 };
 
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
-bool consume(char *op);
+void error_tok(Token *tok, char *fmt, ...);
+Token *consume(char *op);
 Token *consume_ident(void);
 void expect(char *op);
 long expect_number(void);
@@ -86,6 +87,7 @@ typedef struct Node Node;
 struct Node {
   NodeKind kind;  // ノードの型
   Node *next;     // 次のノード
+  Token *tok;     // Representative token
 
   Node *lhs;  // 左辺
   Node *rhs;  // 右辺
