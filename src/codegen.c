@@ -212,8 +212,17 @@ void codegen(Function *prog) {
     printf("  mov rbp, rsp\n");
     printf("  sub rsp, %d\n", fn->stack_size);
 
+    // Push arguments to the stack
+    int i = 0;
+    for (VarList *vl = fn->params; vl; vl = vl->next) {
+      Var *var = vl->var;
+      printf("  mov [rbp-%d], %s\n", var->offset, argreg[i++]);
+    }
+
     // Emit code
-    for (Node *node = fn->node; node; node = node->next) gen(node);
+    for (Node *node = fn->node; node; node = node->next) {
+      gen(node);
+    }
 
     // Epilogue
     printf(".L.return.%s:\n", funcname);

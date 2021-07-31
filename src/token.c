@@ -64,7 +64,7 @@ void expect(char *op) {
   token = token->next;
 }
 
-// 次のトークンの型が数値(TK_NUM)の場合、トークンを1つ読み進めてその数値を返す。
+// 現在のトークンの型が数値(TK_NUM)の場合、トークンを1つ読み進めてその数値を返す。
 // それ以外の場合にはエラーを報告する。
 long expect_number(void) {
   if (token->kind != TK_NUM) error_at(token->str, "数ではありません");
@@ -73,7 +73,7 @@ long expect_number(void) {
   return val;
 }
 
-// 次のトークンの型が識別子(TK_IDENT)の場合、トークンを1つ読み進めてその数値を返す。
+// 現在のトークンの型が識別子(TK_IDENT)の場合、トークンを1つ読み進めてその文字列を返す。
 // それ以外の場合にはエラーを報告する。
 char *expect_ident(void) {
   if (token->kind != TK_IDENT) error_at(token->str, "識別子ではありません");

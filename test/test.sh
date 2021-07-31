@@ -32,6 +32,7 @@ assert() {
     exit 1
   fi
 }
+assert 7 'main() { return add2(3,4); } add2(x,y) { return x+y; }'
 
 # 加減乗除・単項
 assert 0 'main () {return 0; }'
@@ -96,5 +97,10 @@ assert 5 'main () {return ret5(); }'
 assert 8 'main () {return add(3, 5); }'
 assert 2 'main () {return sub(5, 3); }'
 assert 21 'main () {return add6(1,2,3,4,5,6); }'
+
+assert 32 'main() { return ret32(); } ret32() { return 32; }'
+assert 7 'main() { return add2(3,4); } add2(x,y) { return x+y; }'
+assert 1 'main() { return sub2(4,3); } sub2(x,y) { return x-y; }'
+assert 55 'main() { return fib(9); } fib(x) { if (x<=1) return 1; return fib(x-1) + fib(x-2); }'
 
 echo OK

@@ -8,14 +8,16 @@
 
 // 解析中に作成されたすべてのローカル変数インスタンスは
 // この配列に蓄積されます。
-Var *locals;
+static VarList *locals;
 
 // Find a local variable by name.
 static Var *find_var(Token *tok) {
-  for (Var *var = locals; var; var = var->next)
+  for (VarList *vl = locals; vl; vl = vl->next) {
+    Var *var = vl->var;
     if (strlen(var->name) == tok->len &&
         !strncmp(tok->str, var->name, tok->len))
       return var;
+  }
   return NULL;
 }
 
@@ -57,9 +59,12 @@ static Node *new_var_node(Var *var) {
 /* ローカル変数のノード作成関数 */
 static Var *new_lvar(char *name) {
   Var *var = calloc(1, sizeof(Var));  // Varの構造体一つずつに1byteメモリを確保
-  var->next = locals;
   var->name = name;
-  locals = var;
+
+  VarList *vl = calloc(1, sizeof(VarList));
+  vl->var = var;
+  vl->next = locals;
+  locals = vl;
   return var;
 }
 
@@ -91,13 +96,33 @@ Function *program(void) {
   return head.next;
 }
 
-// function = ident "(" ")" "{" stmt* "}"
+/* 引数が0個ならNULLを返却、あれば変数ノード(VarList)を作成 */
+static VarList *read_func_params(void) {
+  if (consume(")")) return NULL;
+
+  VarList *head = calloc(1, sizeof(VarList));
+  head->var = new_lvar(expect_ident());
+  VarList *cur = head;
+
+  while (!consume(")")) {
+    expect(",");
+    cur->next = calloc(1, sizeof(VarList));
+    cur->next->var = new_lvar(expect_ident());
+    cur = cur->next;
+  }
+
+  return head;
+}
+
+// function = ident "(" params? ")" "{" stmt* "}"
+// params   = ident ("," ident)*
 static Function *function(void) {
   locals = NULL;
 
-  char *name = expect_ident();
+  Function *fn = calloc(1, sizeof(Function));
+  fn->name = expect_ident();
   expect("(");
-  expect(")");
+  fn->params = read_func_params();
   expect("{");
 
   Node head = {};
@@ -108,8 +133,6 @@ static Function *function(void) {
     cur = cur->next;
   }
 
-  Function *fn = calloc(1, sizeof(Function));
-  fn->name = name;
   fn->node = head.next;
   fn->locals = locals;
   return fn;
@@ -334,8 +357,8 @@ static Node *primary(void) {
 
     Var *var = find_var(tok);
     if (!var)
-      var = new_lvar(
-          strndup(tok->str, tok->len));  // トーク文字列名を変数名にする
+      // 既存の変数名が見つからない場合、トークン文字列名を変数名にする
+      var = new_lvar(strndup(tok->str, tok->len));
     return new_var_node(var);
   }
 

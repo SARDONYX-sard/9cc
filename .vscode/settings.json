@@ -9,7 +9,10 @@
     "node.h": "c",
     "stdlib.h": "c",
     "ctype.h": "c",
-    "9cc.h": "c"
+    "9cc.h": "c",
+    "*.tcc": "c",
+    "istream": "c",
+    "ostream": "c"
   },
   "files.exclude": {
     "**/**/*.o": true
