@@ -8,10 +8,6 @@
 #include <string.h>
 
 //
-// utils/strndup.c
-//
-
-//
 // tokenize.c
 //
 

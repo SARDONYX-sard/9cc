@@ -120,14 +120,34 @@ void gen(Node *node) {
         printf("  pop %s\n", argreg[i]);
       }
 
+      // 関数を呼び出す前に RSP を 16 バイト境界に揃える必要があります。これは
+      // ABI の要求です。 可変長の関数では RAX を 0 に設定します。
+
+      // アセンブララベル名のインデックス
+      int seq = labelseq++;
+      printf("  mov rax, rsp\n");
+      // 15の2進数は`1111`。これを論理積しても値は変化しない。
+      printf("  and rax, 15\n");  //
+
+      // ? jnzがcmp命令なしで動作する理由が不明
+      printf("  jnz .L.call.%d\n", seq);  // 16バイトの場合
+      printf("  mov rax, 0\n");
       printf("  call %s\n", node->funcname);
+      printf("  jmp .L.end.%d\n", seq);
+
+      printf(".L.call.%d:\n", seq);  // 8バイトの場合、
+      printf("  sub rsp, 8\n");      // 8を引いて16の倍数にしてから
+      printf("  mov rax, 0\n");
+      printf("  call %s\n", node->funcname);  // 関数呼び出し。
+      printf("  add rsp, 8\n");
+      printf(".L.end.%d:\n", seq);
       printf("  push rax\n");
       return;
     }
     case ND_RETURN:
       gen(node->lhs);
       printf("  pop rax\n");
-      printf("  jmp .L.return\n");  // 無条件に指定した場所に移動するにはJMP命令
+      printf("  jmp .L.return\n");  // JMP命令: 無条件に指定した場所に移動する
       return;
   }
 
