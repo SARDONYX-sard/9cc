@@ -13,12 +13,14 @@ int main(int argc, char **argv) {
   Function *prog = program();
 
   // ローカル変数の個数分オフセット(メモリ領域)を割り当てる
-  int offset = 0;
-  for (Var *var = prog->locals; var; var = var->next) {
-    offset += 8;
-    var->offset = offset;
+  for (Function *fn = prog; fn; fn = fn->next) {
+    int offset = 0;
+    for (Var *var = prog->locals; var; var = var->next) {
+      offset += 8;
+      var->offset = offset;
+    }
+    fn->stack_size = offset;
   }
-  prog->stack_size = offset;
 
   // ASTをトラバースしてアセンブリを出す
   codegen(prog);

@@ -64,13 +64,22 @@ void expect(char *op) {
   token = token->next;
 }
 
-// 次のトークンが数値の場合、トークンを1つ読み進めてその数値を返す。
+// 次のトークンの型が数値(TK_NUM)の場合、トークンを1つ読み進めてその数値を返す。
 // それ以外の場合にはエラーを報告する。
 long expect_number(void) {
   if (token->kind != TK_NUM) error_at(token->str, "数ではありません");
   long val = token->val;
   token = token->next;
   return val;
+}
+
+// 次のトークンの型が識別子(TK_IDENT)の場合、トークンを1つ読み進めてその数値を返す。
+// それ以外の場合にはエラーを報告する。
+char *expect_ident(void) {
+  if (token->kind != TK_IDENT) error_at(token->str, "識別子ではありません");
+  char *s = strndup(token->str, token->len);
+  token = token->next;
+  return s;
 }
 
 // 現在解析中の文字列が`;`のトークン型か？

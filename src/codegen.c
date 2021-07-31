@@ -4,10 +4,12 @@
 // 条件分岐によってアセンブリ言語を標準出力する
 //
 
-// ユニークなアセンブラのラベルを生成するための変数
-static int labelseq = 1;
 // 第一引数、第二引数、第三引数…と順に続く配列
 static char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+
+// ユニークなアセンブラのラベルを生成するための変数
+static int labelseq = 1;
+static char *funcname;
 
 /* 与えられたノードのアドレスをスタックに積む関数 */
 static void gen_addr(Node *node) {
@@ -147,7 +149,8 @@ void gen(Node *node) {
     case ND_RETURN:
       gen(node->lhs);
       printf("  pop rax\n");
-      printf("  jmp .L.return\n");  // JMP命令: 無条件に指定した場所に移動する
+      // JMP命令: 無条件に指定した場所に移動する
+      printf("  jmp .L.return.%s\n", funcname);
       return;
   }
 
@@ -198,20 +201,24 @@ void gen(Node *node) {
 
 void codegen(Function *prog) {
   printf(".intel_syntax noprefix\n");
-  printf(".global main\n");
-  printf("main:\n");
 
-  // Prologue
-  printf("  push rbp\n");
-  printf("  mov rbp, rsp\n");
-  printf("  sub rsp, %d\n", prog->stack_size);
+  for (Function *fn = prog; fn; fn = fn->next) {
+    printf(".global %s\n", fn->name);
+    printf("%s:\n", fn->name);
+    funcname = fn->name;
 
-  // Emit code
-  for (Node *node = prog->node; node; node = node->next) gen(node);
+    // Prologue
+    printf("  push rbp\n");
+    printf("  mov rbp, rsp\n");
+    printf("  sub rsp, %d\n", fn->stack_size);
 
-  // Epilogue
-  printf(".L.return:\n");
-  printf("  mov rsp, rbp\n");
-  printf("  pop rbp\n");
-  printf("  ret\n");
+    // Emit code
+    for (Node *node = fn->node; node; node = node->next) gen(node);
+
+    // Epilogue
+    printf(".L.return.%s:\n", funcname);
+    printf("  mov rsp, rbp\n");
+    printf("  pop rbp\n");
+    printf("  ret\n");
+  }
 }

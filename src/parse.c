@@ -65,6 +65,7 @@ static Var *new_lvar(char *name) {
 
 // forward declaration
 
+static Function *function(void);
 static Node *stmt(void);
 static Node *expr(void);
 static Node *assign(void);
@@ -77,23 +78,41 @@ static Node *primary(void);
 
 /*
   複数行プログラム全体をパースする関数
-  EBNF: program = stmt*
+  EBNF: program = function*
  */
 Function *program(void) {
+  Function head = {};
+  Function *cur = &head;
+
+  while (!at_eof()) {
+    cur->next = function();
+    cur = cur->next;
+  }
+  return head.next;
+}
+
+// function = ident "(" ")" "{" stmt* "}"
+static Function *function(void) {
   locals = NULL;
+
+  char *name = expect_ident();
+  expect("(");
+  expect(")");
+  expect("{");
 
   Node head = {};
   Node *cur = &head;
 
-  while (!at_eof()) {
+  while (!consume("}")) {
     cur->next = stmt();
     cur = cur->next;
   }
 
-  Function *prog = calloc(1, sizeof(Function));
-  prog->node = head.next;
-  prog->locals = locals;
-  return prog;
+  Function *fn = calloc(1, sizeof(Function));
+  fn->name = name;
+  fn->node = head.next;
+  fn->locals = locals;
+  return fn;
 }
 
 static Node *read_expr_stmt(void) { return new_unary(ND_EXPR_STMT, expr()); }
@@ -309,7 +328,7 @@ static Node *primary(void) {
       Node *node = new_node(ND_FUNCALL);
       // strndupは第2引数のサイズ指定分、文字列を複製する
       node->funcname = strndup(tok->str, tok->len);
-      node->args = func_args(); // 引数ノードの作成は`func_args`に任せる
+      node->args = func_args();  // 引数ノードの作成は`func_args`に任せる
       return node;
     }
 
