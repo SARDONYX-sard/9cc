@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct Type Type;
+
 //
 // tokenize.c
 //
@@ -24,9 +26,9 @@ typedef struct Token Token;
 struct Token {
   TokenKind kind;  // トークンの型
   Token *next;     // 次の入力トークン
-  int val;    // kindがTK_NUMの場合、その数値
-  char *str;  // トークン文字列
-  int len;    // トークンの長さ
+  int val;         // kindがTK_NUMの場合、その数値
+  char *str;       // トークン文字列
+  int len;         // トークンの長さ
 };
 
 void error(char *fmt, ...);
@@ -60,18 +62,21 @@ struct VarList {
   Var *var;
 };
 
-// 抽象構文木のノードの種類
+// 抽象構文木のノードの種類　   (注: ptrはポインタの意)
 typedef enum {
-  ND_ADD,        // +
-  ND_SUB,        // -
-  ND_MUL,        // *
-  ND_DIV,        // /
-  ND_EQ,         // ==
-  ND_NE,         // !=
-  ND_LT,         // <
-  ND_LE,         // <=
-  ND_ASSIGN,     // =
-  ND_ADDR,       // unary & &を付けられたその変数の格納されているメモリアドレスを取る
+  ND_ADD,       // num + num
+  ND_PTR_ADD,   // ptr + num or num + ptr メモリアドレスの足し算
+  ND_SUB,       // num - num
+  ND_PTR_SUB,   // ptr - num
+  ND_PTR_DIFF,  // ptr - ptr
+  ND_MUL,       // *
+  ND_DIV,       // /
+  ND_EQ,        // ==
+  ND_NE,        // !=
+  ND_LT,        // <
+  ND_LE,        // <=
+  ND_ASSIGN,    // =
+  ND_ADDR,  // unary & &を付けられたその変数の格納されているメモリアドレスを取る
   ND_DEREF,      // unary * メモリアドレスから値を取る
   ND_RETURN,     // "return"
   ND_IF,         // "if"
@@ -89,6 +94,7 @@ typedef struct Node Node;
 struct Node {
   NodeKind kind;  // ノードの型
   Node *next;     // 次のノード
+  Type *ty;       // Type, e.g. int or pointer to int
   Token *tok;     // Representative token
 
   Node *lhs;  // 左辺
@@ -124,6 +130,20 @@ struct Function {
 };
 
 Function *program(void);
+
+//
+// typing.c
+//
+
+typedef enum { TY_INT, TY_PTR } TypeKind;
+
+struct Type {
+  TypeKind kind;
+  Type *base;  // アドレス先の値
+};
+
+bool is_integer(Type *ty);
+void add_type(Node *node);
 
 //
 // codegen.c
