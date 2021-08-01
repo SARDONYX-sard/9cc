@@ -21,7 +21,7 @@ assert() {
   input="$2"
 
   ./build/9cc "$input" >./build/tmp.s
-  # ! .dataオブジェクトのアセンブリを出力しているので、-no-pieオプションがないとエラー
+  # ! `.data: データ領域の開始`を使うアセンブリを出力しているので、-no-pieオプションがないとエラー
   gcc -no-pie -o ./build/tmp ./build/tmp.s ./build/tmp2.o
   ./build/tmp
   actual="$?"
