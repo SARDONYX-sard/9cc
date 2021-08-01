@@ -55,6 +55,14 @@ Token *consume(char *op) {
   return t;
 }
 
+// 現在のトークンが与えられた文字列にマッチした場合、trueを返します。
+Token *peek(char *s) {
+  if (token->kind != TK_RESERVED || strlen(s) != token->len ||
+      strncmp(token->str, s, token->len))
+    return NULL;
+  return token;
+}
+
 /*
   現在のトークンが識別子の場合、
   現在のトークンを返し、トークンを1つ読み進める
@@ -67,12 +75,10 @@ Token *consume_ident(void) {
   return t;
 }
 
-//  現在のトークンが `op` であることを確認し、トークンを1つ読み進める。
+//  現在のトークンが与えられた文字列であることを確認し、トークンを1つ読み進める。
 // それ以外の場合にはエラーを報告する。
-void expect(char *op) {
-  if (token->kind != TK_RESERVED || strlen(op) != token->len ||
-      strncmp(token->str, op, token->len))
-    error_tok(token, "expected \"%s\"", op);
+void expect(char *s) {
+  if (!peek(s)) error_tok(token, "expected \"%s\"", s);
   token = token->next;
 }
 
@@ -124,7 +130,7 @@ static bool is_alnum(char c) { return is_alpha(c) || ('0' <= c && c <= '9'); }
 /* *pに渡されたトークンが予約語と一致したらそれを返す関数 */
 static char *starts_with_reserved(char *p) {
   // Keyword
-  static char *kw[] = {"return", "if", "else", "while", "for"};
+  static char *kw[] = {"return", "if", "else", "while", "for", "int"};
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++) {
     int len = strlen(kw[i]);

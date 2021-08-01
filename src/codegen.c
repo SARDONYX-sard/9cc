@@ -45,6 +45,8 @@ static void store(void) {
 /* スタックマシンライクな構文木からのアセンブリ出力関数 */
 void gen(Node *node) {
   switch (node->kind) {
+    case ND_NULL:
+      return;
     case ND_NUM:
       printf("  push %ld\n", node->val);
       return;
