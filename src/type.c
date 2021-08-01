@@ -2,6 +2,7 @@
 
 Type *int_type = &(Type){TY_INT, 8};
 
+/* 渡されたType構造体のkindがTY_INTであるか */
 bool is_integer(Type *ty) { return ty->kind == TY_INT; }
 
 // ポインタの構造体を作成し、返却する関数

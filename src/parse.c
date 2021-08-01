@@ -37,6 +37,7 @@ static Node *new_binary(NodeKind kind, Node *lhs, Node *rhs, Token *tok) {
   return node;
 }
 
+/* 左しかない木ノードの作成関数 */
 static Node *new_unary(NodeKind kind, Node *expr, Token *tok) {
   Node *node = new_node(kind, tok);
   node->lhs = expr;
@@ -455,7 +456,7 @@ static Node *func_args(void) {
 
 /*
   算術優先記号`()`と`関数`、`変数`、`整数`をパースする関数
-  EBNF: primary = "(" expr ")" | ident args?  | num
+  EBNF: primary = "(" expr ")" | "sizeof" unary | ident args?  | num
  */
 static Node *primary(void) {
   // 次のトークンが"("なら、"(" expr ")"のはず
@@ -466,6 +467,12 @@ static Node *primary(void) {
   }
 
   Token *tok;
+  if (tok = consume("sizeof")) {
+    Node *node = unary();
+    add_type(node);
+    return new_num(node->ty->size, tok);
+  }
+
   if (tok = consume_ident()) {
     // 識別子の次に"()"がきたら Function
     if (consume("(")) {
