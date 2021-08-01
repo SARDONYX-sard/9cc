@@ -22,7 +22,7 @@ OBJS=$(SRCS:.c=.o)
 #-------------------------------------------------------------------------------------------------------
 
 # clean & test
-ct: clean
+ct: clean fmt
 				make test && make clean
 
 build: $(OBJS)

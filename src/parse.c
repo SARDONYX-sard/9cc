@@ -108,11 +108,12 @@ static Type *basetype(void) {
   return ty;
 }
 
-/* 次のトークンが[でない(つまり整数)ならそのまま、配列ならarray_ofで */
+/* 次のトークンが[でない(つまり整数)ならそのまま、配列ならarray_ofを適用 */
 static Type *read_type_suffix(Type *base) {
   if (!consume("[")) return base;
   int sz = expect_number();
   expect("]");
+  base = read_type_suffix(base);
   return array_of(base, sz);
 }
 
