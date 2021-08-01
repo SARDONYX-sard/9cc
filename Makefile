@@ -23,7 +23,7 @@ OBJS=$(SRCS:.c=.o)
 
 # clean & test
 ct: clean
-				make test
+				make test && make clean
 
 build: $(OBJS)
 				mkdir -p build && $(CC) -o ./build/9cc $(OBJS) $(LDFLAGS)

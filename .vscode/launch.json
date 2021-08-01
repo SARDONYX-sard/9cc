@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/build/9cc",
       // "args": ["a=3;b=5*6-8;a+b/2;"],
-      "args": ["i=0; j=0; for (i=0; i<=10; i=i+1) j=i+j; return j;"],
+      "args": ["int main() { int x[3]; *x=3; *(x+1)=4; *(x+2)=5; return *(x+2); }"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/src",
       "environment": [],
