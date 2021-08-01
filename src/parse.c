@@ -83,6 +83,7 @@ static Node *relational(void);
 static Node *add(void);
 static Node *mul(void);
 static Node *unary(void);
+static Node *postfix(void);
 static Node *primary(void);
 
 /*
@@ -338,6 +339,7 @@ static Node *relational(void) {
   }
 }
 
+/* 整数同士の足し算、ポインタの足し算ノードを作成する関数 */
 static Node *new_add(Node *lhs, Node *rhs, Token *tok) {
   add_type(lhs);
   add_type(rhs);
@@ -351,6 +353,7 @@ static Node *new_add(Node *lhs, Node *rhs, Token *tok) {
   error_tok(tok, "invalid operands");
 }
 
+/* 整数同士の引き算、ポインタの引き算ノードを作成する関数 */
 static Node *new_sub(Node *lhs, Node *rhs, Token *tok) {
   add_type(lhs);
   add_type(rhs);
@@ -403,7 +406,7 @@ static Node *mul(void) {
 /*
   単項演算子をパースする関数
   EBNF: unary   = ("+" | "-" | "*" | "&")? unary　
-                | primary
+                | postfix
 */
 static Node *unary(void) {
   Token *tok;
@@ -417,7 +420,20 @@ static Node *unary(void) {
 
   if (tok = consume("*"))  // ポインタまたはアドレスから値を取り出す
     return new_unary(ND_DEREF, unary(), tok);
-  return primary();
+  return postfix();
+}
+
+// postfix = primary ("[" expr "]")*
+static Node *postfix(void) {
+  Node *node = primary();
+  Token *tok;
+  while (tok = consume("[")) {
+    // x[y] is short for *(x+y)
+    Node *exp = new_add(node, expr(), tok);
+    expect("]");
+    node = new_unary(ND_DEREF, exp, tok);
+  }
+  return node;
 }
 
 /*
