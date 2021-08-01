@@ -10,10 +10,10 @@ int main(int argc, char **argv) {
   // 結果はcodeに保存される
   user_input = argv[1];
   token = tokenize();
-  Function *prog = program();
+  Program *prog = program();
 
   // ローカル変数の個数分オフセット(メモリ領域)を割り当てる
-  for (Function *fn = prog; fn; fn = fn->next) {
+  for (Function *fn = prog->fns; fn; fn = fn->next) {
     int offset = 0;
     for (VarList *vl = fn->locals; vl; vl = vl->next) {
       Var *var = vl->var;

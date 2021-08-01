@@ -1,6 +1,6 @@
 {
   "editor.rulers": [100],
-  "cSpell.words": ["idiv", "movzb", "sete", "setle", "setne"],
+  "cSpell.words": ["gvar", "idiv", "movzb", "sete", "setle", "setne"],
   "files.associations": {
     "*.html": "html",
     "*.md": "markdown",

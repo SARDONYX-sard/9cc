@@ -51,11 +51,14 @@ extern Token *token;
 // parse.c
 //
 
-// ローカル変数
+// 変数
 typedef struct Var Var;
 struct Var {
-  char *name;  // 変数の名前
-  Type *ty;    // Type
+  char *name;     // 変数の名前
+  Type *ty;       // Type
+  bool is_local;  // local or global
+
+  // ローカル変数
   int offset;  // RBP(ベースレジスタ)からの相対距離(オフセット)
 };
 
@@ -133,7 +136,12 @@ struct Function {
   int stack_size;
 };
 
-Function *program(void);
+typedef struct {
+  VarList *globals;
+  Function *fns;
+} Program;
+
+Program *program(void);
 
 //
 // typing.c
@@ -159,4 +167,4 @@ void add_type(Node *node);
 // codegen.c
 //
 
-void codegen(Function *prog);
+void codegen(Program *prog);
