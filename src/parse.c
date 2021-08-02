@@ -512,6 +512,26 @@ static Node *postfix(void) {
   return node;
 }
 
+// stmt-expr = "(" "{" stmt stmt* "}" ")"
+//
+// ステートメント式は、GNU Cの拡張機能です。
+static Node *stmt_expr(Token *tok) {
+  Node *node = new_node(ND_STMT_EXPR, tok);
+  node->body = stmt();
+  Node *cur = node->body;
+
+  while (!consume("}")) {
+    cur->next = stmt();
+    cur = cur->next;
+  }
+  expect(")");
+
+  if (cur->kind != ND_EXPR_STMT)
+    error_tok(cur->tok, "stmt expr returning void is not supported");
+  memcpy(cur, cur->lhs, sizeof(Node));
+  return node;
+}
+
 /*
   引数の有無に応じて処理が分岐し、パースする関数
   EBNF: func-args = "(" (assign ("," assign)*)? ")"
@@ -531,18 +551,25 @@ static Node *func_args(void) {
 
 /*
   算術優先記号`()`と`関数`、`変数`、`整数`をパースする関数
-  EBNF: primary = "(" expr ")" | "sizeof" unary | ident args?  | str | num
-          args = "(" ident ("," ident)* ")"
+  EBNF: primary = "(" "{" stmt-expr-tail
+                | "(" expr ")"
+                | "sizeof" unary
+                | ident args?
+                | str
+                | num
  */
 static Node *primary(void) {
+  Token *tok;
+
   // 次のトークンが"("なら、"(" expr ")"のはず
   if (consume("(")) {
+    if (consume("{")) return stmt_expr(tok);
+
     Node *node = expr();
     expect(")");
     return node;
   }
 
-  Token *tok;
   if (tok = consume("sizeof")) {
     Node *node = unary();
     add_type(node);

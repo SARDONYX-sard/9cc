@@ -99,6 +99,7 @@ typedef enum {
   ND_BLOCK,      // "block"
   ND_FUNCALL,    // Function call
   ND_EXPR_STMT,  // Expression statement
+  ND_STMT_EXPR,  // Statement expression
   ND_VAR,        // 変数
   ND_NUM,        // Integer
   ND_NULL,       // Empty statement
