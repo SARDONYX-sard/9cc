@@ -1,10 +1,9 @@
 {
   "editor.rulers": [100],
-  "cSpell.words": ["gvar", "idiv", "movsx", "movzb", "sete", "setle", "setne"],
+  "cSpell.words": ["addx", "gvar", "idiv", "movsx", "movzb", "sete", "setle", "setne"],
   "files.associations": {
     "*.html": "html",
     "*.md": "markdown",
-    "*.txt": "django-txt",
     "token.h": "c",
     "node.h": "c",
     "stdlib.h": "c",
@@ -12,7 +11,8 @@
     "9cc.h": "c",
     "*.tcc": "c",
     "istream": "c",
-    "ostream": "c"
+    "ostream": "c",
+    "tests": "c",
   },
   "files.exclude": {
     "**/**/*.o": true

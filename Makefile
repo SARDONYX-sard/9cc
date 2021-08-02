@@ -11,18 +11,19 @@ rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 # ・あるパターンにマッチする全てのファイルを再帰的に検索する方法
 ALL_CS := $(call rwildcard,src/,*.c)
 
-
-# 変数宣言
+# コンパイルオプションについて:
 # -std=c11: Cの最新規格であるC11で書かれたソースコードということを伝える
 # -g: デバグ情報を出力する
 # -static: スタティックリンクする
+
+# 変数宣言
 CFLAGS=-std=c11 -g -static
 SRCS=$(call ALL_CS)
 OBJS=$(SRCS:.c=.o)
 #-------------------------------------------------------------------------------------------------------
 
 # clean & test
-ct: clean fmt
+ct: clean #fmt
 				make test && make clean
 
 build: $(OBJS)
@@ -31,11 +32,13 @@ build: $(OBJS)
 $(OBJS): src/9cc.h # すべての.oファイルが9cc.hに依存していることを表している
 
 test: build
-				bash ./test/test.sh
+				./build/9cc ./test/tests > ./build/tmp.s
+				gcc -static -o ./build/tmp ./build/tmp.s
+				./build/tmp
 
 # bash formmat
-fmt:
-				shfmt -i 2 -w ./**/*.sh && echo formmatted.
+# fmt:
+# 				shfmt -l -kp -i 2 -w ./**/*.sh && echo formmatted.
 
 clean:
 				rm -rf ./build src/*.o *~ tmp*
