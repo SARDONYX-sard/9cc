@@ -1,9 +1,10 @@
 #include "9cc.h"
 
+Type *char_type = &(Type){TY_CHAR, 1};
 Type *int_type = &(Type){TY_INT, 8};
 
 /* 渡されたType構造体のkindがTY_INTであるか */
-bool is_integer(Type *ty) { return ty->kind == TY_INT; }
+bool is_integer(Type *ty) { return ty->kind == TY_CHAR || ty->kind == TY_INT; }
 
 // ポインタの構造体を作成し、返却する関数
 Type *pointer_to(Type *base) {

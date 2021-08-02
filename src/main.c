@@ -1,7 +1,11 @@
 #include "./9cc.h"
 
-// 入力プログラム
-char *user_input;
+int align_to(int n, int align) {
+  // 10 = 1010
+  // alignに8を渡すと-1で７(0111)。ビット反転され8(1000)に。
+  // 1000を論理積するので作られる値は、0~8までの数になる。
+  return (n + align - 1) & ~(align - 1);
+}
 
 int main(int argc, char **argv) {
   if (argc != 2) error("%s: 引数の個数が正しくありません", argv[0]);
@@ -20,7 +24,8 @@ int main(int argc, char **argv) {
       offset += var->ty->size;
       var->offset = offset;
     }
-    fn->stack_size = offset;
+
+    fn->stack_size = align_to(offset, 8);
   }
 
   // ASTをトラバースしてアセンブリを出す

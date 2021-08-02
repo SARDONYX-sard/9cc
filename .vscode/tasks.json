@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "make",
+      "script": "build",
+      "target": "build",
+      "path": "",
+      "fileName": "Makefile",
+      "uri": {
+        "$mid": 1,
+        "path": "/home/sardonyx/environment/create-compiler-lesson/Makefile",
+        "scheme": "vscode-remote",
+        "authority": "wsl+ubuntu"
+      },
+      "problemMatcher": ["$gcc"],
+      "group": "build",
+      "label": "make: build"
+    }
+  ]
+}

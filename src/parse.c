@@ -152,10 +152,16 @@ Program *program(void) {
   return prog;
 }
 
-// basetype = "int" "*"*
+// basetype = ("char" | "int") "*"*
 static Type *basetype(void) {
-  expect("int");
-  Type *ty = int_type;
+  Type *ty;
+  if (consume("char")) {
+    ty = char_type;
+  } else {
+    expect("int");
+    ty = int_type;
+  }
+
   while (consume("*")) ty = pointer_to(ty);
   return ty;
 }
@@ -255,6 +261,9 @@ static Node *read_expr_stmt(void) {
   return new_unary(ND_EXPR_STMT, expr(), tok);
 }
 
+// 次のトークンが型を表す場合は、trueを返します。
+static bool is_typename(void) { return peek("char") || peek("int"); }
+
 /* 渡されたノードに型ノードを追加する処理を挟む */
 static Node *stmt(void) {
   Node *node = stmt2();
@@ -335,7 +344,7 @@ static Node *stmt2(void) {
     return node;
   }
 
-  if (tok = peek("int")) return declaration();
+  if (is_typename()) return declaration();
 
   Node *node = read_expr_stmt();
   expect(";");
