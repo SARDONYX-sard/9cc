@@ -18,8 +18,9 @@ typedef struct Type Type;
 typedef enum {
   TK_RESERVED,  // キーワード or 区切り文字(符号など)
   TK_IDENT,     // 識別子(変数や関数など)
-  TK_NUM,       // 整数トークン
-  TK_EOF,       // 入力の終わりを表すトークン
+  TK_STR,  // 文字列リテラル(数値や文字列を直接に記述した定数のこと)
+  TK_NUM,  // 整数トークン
+  TK_EOF,  // 入力の終わりを表すトークン
 } TokenKind;
 
 // トークン型
@@ -30,6 +31,9 @@ struct Token {
   int val;         // kindがTK_NUMの場合、その数値
   char *str;       // トークン文字列
   int len;         // トークンの長さ
+
+  char *contents;  // 終端を含む文字列リテラルの内容 '\0'
+  char cont_len;   // string literal length
 };
 
 void error(char *fmt, ...);
@@ -60,6 +64,10 @@ struct Var {
 
   // ローカル変数
   int offset;  // RBP(ベースレジスタ)からの相対距離(オフセット)
+
+  // Global variable
+  char *contents;
+  int cont_len;
 };
 
 typedef struct VarList VarList;
@@ -161,7 +169,7 @@ extern Type *int_type;
 
 bool is_integer(Type *ty);
 Type *pointer_to(Type *base);
-Type *array_of(Type *base, int size);
+Type *array_of(Type *base, int len);
 void add_type(Node *node);
 
 //
