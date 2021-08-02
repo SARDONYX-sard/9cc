@@ -20,7 +20,7 @@ assert() {
   expected="$1"
   input="$2"
 
-  ./build/9cc "$input" >./build/tmp.s
+  ./build/9cc <(echo "$input") >./build/tmp.s
   # ! `.data: データ領域の開始`を使うアセンブリを出力しているので、-no-pieオプションがないとエラー
   gcc -no-pie -o ./build/tmp ./build/tmp.s ./build/tmp2.o
   ./build/tmp
