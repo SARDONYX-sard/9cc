@@ -9,7 +9,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/9cc",
-      "args": ["int main() { return sub_char(7, 3, 3); } int sub_char(char a, char b, char c) { return a-b-c; }"],
+      "args": ["${workspaceFolder}/test/tests"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/src",
       "environment": [],

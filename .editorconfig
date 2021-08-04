@@ -1,12 +1,12 @@
 root = true
 
 [*.{c,sh}]
-end_of_line = lf                # 改行コード: cr, lf, crlf
-charset = utf-8                 # 文字コード: latin1, utf-8, utf-8-bom, utf-16be, utf-16le
-indent_style = space            # インデントはタブかスペースか: space, tab
-indent_size = 2                 # インデントのサイズ:	2, 4, 8
-trim_trailing_whitespace = true # 行末尾のホワイトスペース（空白文字）を削除するか: true, false
-insert_final_newline = true     # ファイル末尾に空行を挿入するか: true
+end_of_line = lf                 # 改行コード: cr, lf, crlf
+charset = utf-8                  # 文字コード: latin1, utf-8, utf-8-bom, utf-16be, utf-16le
+indent_style = space             # インデントはタブかスペースか: space, tab
+indent_size = 2                  # インデントのサイズ:	2, 4, 8
+trim_trailing_whitespace = true  # 行末尾のホワイトスペース（空白文字）を削除するか: true, false
+insert_final_newline = true      # ファイル末尾に空行を挿入するか: true
 
 [Makefile]
 end_of_line = lf
